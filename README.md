@@ -1,15 +1,16 @@
 py-gaugette
 ===========
 
-A library for interfacing hardware with the Raspberry Pi and BeagleBone Black.
+A library for interfacing hardware with the Raspberry Pi and BeagleBone Black. C.H.I.P. support is also in the works.
 Supports SSD1306 displays, rotary encoders, capacitance switches, RGB leds and other devices.
+
 
 Platform Compatibility
 ======================
 
-This library runs on both the Raspberry Pi and BeagleBone Black.  However
-some classes have not yet been ported or tested on both platforms, so refer
-to the table below for compatibility information.
+This library runs on both the Raspberry Pi and BeagleBone Black, with support for the C.H.I.P currently being added.  However
+some classes have not yet been ported or tested on all platforms, so refer
+to the table below for compatibility information. See below for CHIP information.
 
 The library has been developed using Python v2.7, with a goal of also
 maintaining Python 3 compatibility.  However as of Feb 2014 some of the
@@ -19,13 +20,27 @@ required libraries are not yet available for Python 3.
 
 Here's the current compatibility matrix:
 
-| Class         | RPi + Python 2.7 | RPi + Python 3   | BBB + Python 2.7 | BBB + Python 3   |
+| Class         | RPi + Python 2.7 | RPi + Python 3   | BBB + Python 2.7 | BBB + Python 3   | 
 |:--------------|:----------------:|:----------------:|:----------------:|:----------------:|
 | CapSwitch     | yes              | yes              | yes              | no               |
 | RgbLed        | yes              | yes              | no               | no               |
 | RotaryEncoder | yes              | yes              | yes              | no               |
 | SSD1306       | yes              | no               | yes              | no               |
 | Switch        | yes              | yes              | yes              | no               |
+
+C.H.I.P. compatibility
+======================
+
+As seen, there's still a long way to go with the CHIP.
+
+| Class         | Status
+|:--------------|:----------------:|
+| CapSwitch     | no               |
+| RgbLed        | no               | 
+| RotaryEncoder | untested         | 
+| SSD1306       | no               | 
+| Switch        | no               | 
+
 
 Prerequisites for the Raspberry Pi
 ==================================
@@ -77,6 +92,26 @@ To install:
 /usr/bin/ntpdate -b -s -u pool.ntp.org
 opkg update && opkg install python-pip python-setuptools python-smbus
 pip install Adafruit_BBIO
+```
+
+Prerequisites for the C.H.I.P.
+==============================
+
+### CHIP_IO
+
+Modules that use GPIO require [CHIP_IO](https://github.com/xtacocorex/CHIP_IO).
+SPI compatibility is currently untested.
+
+To install:
+```
+sudo ntpdate pool.ntp.org
+sudo apt-get update
+sudo apt-get install build-essential python-dev python-pip -y
+git clone git://github.com/xtacocorex/CHIP_IO.git
+cd CHIP_IO
+sudo python setup.py install
+cd ..
+sudo rm -rf CHIP_IO
 ```
 
 SSD1306 OLED Usage

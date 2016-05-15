@@ -7,7 +7,7 @@
 #
 # On the RPi, we use wiringpi2.GPIO
 # On the BBB, we use Adafruit_BBIO.GPIO
-#
+# On the CHIP, we use CHIP_IO.GPIO.
 #----------------------------------------------------------------------
 import gaugette.platform
 

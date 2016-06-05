@@ -27,7 +27,7 @@ class GPIO:
             self.PUD_DOWN = self.gpio.PUD_DOWN
             self.PUD_OFF = self.gpio.PUD_OFF
             
-            elif gaugette.platform.isCHIP:
+        elif gaugette.platform.isCHIP:
             import CHIP_IO.GPIO
             self.gpio = CHIP_IO.GPIO
             self.setup = self.gpio.setup

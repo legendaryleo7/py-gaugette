@@ -27,5 +27,12 @@ class SPI:
             self.spi = Adafruit_BBIO.SPI.SPI(bus, device)
             self.writebytes = self.spi.writebytes
 
+	elif gaugette.platform.isCHIP:
+            import spidev
+            import spidev
+            self.spi = spidev.SpiDev()
+            self.spi.open(bus, device)
+            self.writebytes = self.spi.writebytes
+
         else:
             raise NotImplementedError("This platform is not supported.")

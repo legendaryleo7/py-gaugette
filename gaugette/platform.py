@@ -25,17 +25,24 @@ import re
 UNKNOWN          = 0
 RASPBERRY_PI     = 1
 BEAGLEBONE_BLACK = 2
+CHIP             = 5
 
 isBeagleBoneBlack = False
 isRaspberryPi = False
+isCHIP = False
 
 def platform_detect():
-    """Detect if running on the Raspberry Pi or Beaglebone Black and return the
-    platform type.  Will return RASPBERRY_PI, BEAGLEBONE_BLACK, or UNKNOWN."""
+    """Detect if running on the Raspberry Pi, CHIP, or Beaglebone Black and return the
+    platform type.  Will return RASPBERRY_PI, CHIP, BEAGLEBONE_BLACK, or UNKNOWN."""
     # Handle Raspberry Pi
     pi = pi_version()
     if pi is not None:
         return RASPBERRY_PI
+
+    #Handle CHIP
+    chip = detect_chip()
+    if chip is not None:
+        return CHIP
 
     # Handle Beaglebone Black
     # TODO: Check the Beaglebone Black /proc/cpuinfo value instead of reading
@@ -48,6 +55,7 @@ def platform_detect():
     elif plat.lower().find('armv7l-with-glibc2.4') > -1:
         return BEAGLEBONE_BLACK
     
+
     # Couldn't figure out the platform, just return unknown.
     return UNKNOWN
 
@@ -98,6 +106,29 @@ def pi_version():
         # Something else, not a pi.
         return None
 
+def detect_chip():
+    """ Detect the CHIP computer from Next Thing Co, this could also be used to other 
+        Allwinner Based SBCs
+    """
+    # Open cpuinfo
+    with open('/proc/cpuinfo','r') as infile:
+        cpuinfo = infile.read()
+    
+    # Match a line like 'Hardware        : Allwinner sun4i/sun5i Families'
+    match = re.search('^Hardware\s+:.*$', cpuinfo,
+                      flags=re.MULTILINE | re.IGNORECASE)
+
+    # Check result
+    if not match:
+        return None
+    if "sun4i/sun5i" in match.group(0):
+        return True
+    else:
+        return None
+
+
+
 platform = platform_detect()
 isBeagleBoneBlack = platform == BEAGLEBONE_BLACK
 isRaspberryPi = platform == RASPBERRY_PI
+isCHIP = platform == CHIP

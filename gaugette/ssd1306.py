@@ -139,13 +139,20 @@ class SSD1306:
         self.gpio.output(self.dc_pin, self.gpio.HIGH)
         #  chunk data to work around 255 byte limitation in adafruit implementation of writebytes
         # revisit - change to 1024 when Adafruit_BBIO is fixed.
-        max_xfer = 255 if gaugette.platform.isBeagleBoneBlack else 1024
+
+	max_xfer = 1024
+	if gaugette.platform.isBeagleBoneBlack:
+	    max_xfer = 255
+	elif gaugette.platform.isCHIP:
+	    max_xfer = 64
+
+        #max_xfer = 255 if (gaugette.platform.isBeagleBoneBlack or gaugette.platform.isCHIP) else 1024
         start = 0
         remaining = len(bytes)
         while remaining>0:
             count = remaining if remaining <= max_xfer else max_xfer
             remaining -= count
-            self.spi.writebytes(bytes[start:start+count])
+	    self.spi.writebytes(bytes[start:start+count])
             start += count
         self.gpio.output(self.dc_pin, self.gpio.LOW)
         

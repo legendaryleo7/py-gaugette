@@ -5,7 +5,7 @@ A_PIN = input("Please enter A Pin:")
 B_PIN = input("Please enter B Bin:")
 
 
-encoder = gaugette.rotary_encoder.RotaryEncoder.Worker(A_PIN, B_PIN)
+encoder = gaugette.rotaryencoder.RotaryEncoder.Worker(A_PIN, B_PIN)
 encoder.start()
 
 

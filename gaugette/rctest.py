@@ -1,4 +1,4 @@
-import gaugette
+import gaugette.rotaryencoder
 
 
 A_PIN = input("Please enter A Pin:")

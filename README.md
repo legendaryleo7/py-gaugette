@@ -31,13 +31,12 @@ Here's the current compatibility matrix:
 C.H.I.P. compatibility
 ======================
 
-As seen, there's still a long way to go with the CHIP.
 
 | Class         | Status
 |:--------------|:----------------:|
 | CapSwitch     | no               |
 | RgbLed        | no               | 
-| RotaryEncoder | untested         | 
+| RotaryEncoder | Yes              | 
 | SSD1306       | no               | 
 | Switch        | no               | 
 

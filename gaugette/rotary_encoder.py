@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # rotary_encoder.py from https://github.com/guyc/py-gaugette
 # Guy Carpenter, Clearwater Software
 #
@@ -12,7 +12,7 @@
 # to ground.  Pins A and B will have their pull-up resistor
 # pulled high.
 # 
-# Usage:
+# Usage (without Worker Class):
 #
 #     import gaugette.rotary_encoder
 #     A_PIN = 7  # use wiring pin numbers here
@@ -22,26 +22,40 @@
 #       delta = encoder.delta() # returns 0,1,or -1
 #       if delta!=0:
 #         print delta
+#
+#
+# Usage (with Worker Class):
+#
+#
+#   import gaugette.rotary_encoder
+#
+#   A_PIN = "XIO-P0" #Sample CHIP Pins
+#   B_PIN = "XIO-P1" #Sample CHIP Pins
+#   encoder = gaugette.rotaryencoder.RotaryEncoder.Worker(A_PIN, B_PIN)
+#   encoder.start()
+#
+#
+#   while 1:
+#       delta = encoder.get_delta()
+#       if delta != 0:
+#           print "rotated %d" % delta
 
-import gaugette.gpio
+import Adafruit_GPIO as GPIO
 import math
 import threading
 import time
 
+
 class RotaryEncoder:
 
-    #----------------------------------------------------------------------
-    # Pass the wiring pin numbers here.  See:
-    #  https://projects.drogon.net/raspberry-pi/wiringpi2/pins/
-    #----------------------------------------------------------------------
     def __init__(self, a_pin, b_pin):
         self.a_pin = a_pin
         self.b_pin = b_pin
 
-        self.gpio = gaugette.gpio.GPIO()
+        self.gpio = GPIO.get_platform_gpio()
 
-        self.gpio.setup(self.a_pin, self.gpio.IN, self.gpio.PUD_UP)
-        self.gpio.setup(self.b_pin, self.gpio.IN, self.gpio.PUD_UP)
+        self.gpio.setup(self.a_pin, GPIO.IN)
+        self.gpio.setup(self.b_pin, GPIO.IN)
 
         self.last_delta = 0
         self.r_seq = self.rotation_sequence()
@@ -54,44 +68,40 @@ class RotaryEncoder:
         self.steps_per_cycle = 4
         self.remainder = 0
 
-    # Gets the 2-bit rotation state of the current position
-    # This is deprecated - we now use rotation_sequence instead.
-    def rotation_state(self):
-        a_state = self.gpio.input(self.a_pin)
-        b_state = self.gpio.input(self.b_pin)
-        r_state = a_state | b_state << 1
-        return r_state
-
-    # Returns the quadrature encoder state converted into
-    # a numerical sequence 0,1,2,3,0,1,2,3...
-    #    
-    # Turning the encoder clockwise generates these
-    # values for switches B and A:
-    #  B A
-    #  0 0
-    #  0 1
-    #  1 1
-    #  1 0 
-    # We convert these to an ordinal sequence number by returning
-    #   seq = (A ^ B) | B << 2
-    # 
     def rotation_sequence(self):
+
+        # Returns the quadrature encoder state converted into
+        # a numerical sequence 0,1,2,3,0,1,2,3...
+        #
+        # Turning the encoder clockwise generates these
+        # values for switches B and A:
+        #  B A
+        #  0 0
+        #  0 1
+        #  1 1
+        #  1 0
+        # We convert these to an ordinal sequence number by returning
+        #   seq = (A ^ B) | B << 2
+        #
+
         a_state = self.gpio.input(self.a_pin)
         b_state = self.gpio.input(self.b_pin)
         r_seq = (a_state ^ b_state) | b_state << 1
         return r_seq
 
-    # Returns offset values of -2,-1,0,1,2
     def get_delta(self):
+        # Returns offset values of -2,-1,0,1,2
+
         delta = 0
         r_seq = self.rotation_sequence()
         if r_seq != self.r_seq:
             delta = (r_seq - self.r_seq) % 4
-            if delta==3:
+            if delta == 3:
                 delta = -1
-            elif delta==2:
-                delta = int(math.copysign(delta, self.last_delta))  # same direction as previous, 2 steps
-                
+            elif delta == 2:
+                delta = int(math.copysign(delta, self.last_delta))
+                # same direction as previous, 2 steps
+
             self.last_delta = delta
             self.r_seq = r_seq
 
@@ -103,16 +113,20 @@ class RotaryEncoder:
     # get_cycles() instead of get_delta().  It returns -1, 0 or 1.  If
     # you have 2 steps per detent, set encoder.steps_per_cycle to 2
     # before you call this method.
+
     def get_cycles(self):
         # python negative integers do not behave like they do in C.
         #   -1 // 2 = -1 (not 0)
         #   -1 % 2 =  1 (not -1)
-        # // is integer division operator.  Note the behaviour of the / operator
-        # when used on integers changed between python 2 and 3. 
+        # // is integer division operator.
+        # Note the behaviour of the / operator
+        # when used on integers changed between python 2 and 3.
         # See http://www.python.org/dev/peps/pep-0238/
-        self.remainder += self.get_delta() 
+        self.remainder += self.get_delta()
         cycles = self.remainder // self.steps_per_cycle
-        self.remainder %= self.steps_per_cycle # remainder always remains positive
+        self.remainder %= self.steps_per_cycle
+        # remainder always remains positive
+
         return cycles
 
     class Worker(threading.Thread):
@@ -140,3 +154,4 @@ class RotaryEncoder:
                 delta = self.delta
                 self.delta = 0
             return delta
+
